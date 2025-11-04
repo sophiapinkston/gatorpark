@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>GatorPark Dashboard</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    #spotA1 {
+      font-size: 24px;
+      margin-top: 20px;
+      padding: 10px;
+      border: 2px solid #333;
+      width: 200px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <h1>GatorPark Dashboard</h1>
+  <div id="spotA1">Loading...</div>
+
+  <!-- Firebase CDN -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+  <script>
+    // Your Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyC-Gc7pl0JDUAKkEI0nBrk56X9EROphzbU",
+      authDomain: "gatorpark-1d593.firebaseapp.com",
+      projectId: "gatorpark-1d593",
+      storageBucket: "gatorpark-1d593.firebasestorage.app",
+      messagingSenderId: "721098330413",
+      appId: "1:721098330413:web:5f69e0b77d208e152143a4",
+      measurementId: "G-FSMGQQ6EPB"
+    };
+
+    // Initialize Firebase
+    const app = firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    // Get spotA1 element
+    const spotElement = document.getElementById("spotA1");
+
+    // Listen for live updates
+    db.collection("garages")
+      .doc("garage1")
+      .collection("spots")
+      .doc("spotA1")
+      .onSnapshot((doc) => {
+        const data = doc.data();
+        if (data) {
+          spotElement.innerText = data.occupied ? "Occupied 🚗" : "Free ✅";
+        } else {
+          spotElement.innerText = "No Data";
+        }
+      });
+  </script>
+</body>
+</html>
