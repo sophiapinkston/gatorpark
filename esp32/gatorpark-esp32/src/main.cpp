@@ -21,13 +21,13 @@ String spotPath_A3 = "/garages/A/spots/A3.json";
 Adafruit_MMC5603 mmc;
 
 // Debouncing and sampling parameters for reading sensors 
-const uint32_t SAMPLE_MS    = 80;
+const uint32_t SAMPLE_MS    = 100;          // slightly slower loop for stability (was 80)
 const uint32_t HEARTBEAT_MS = 5000;
 
-float US_ENTER_CM  = 20.0f;
-float US_EXIT_CM   = 10.0f;
+float US_ENTER_CM  = 25.0f;                 // widened hysteresis for steadier enter
+float US_EXIT_CM   = 12.0f;                 // widened hysteresis for steadier exit
 const int HIT_UP   = 5;
-const int HIT_DOWN = 7;
+const int HIT_DOWN = 10;                    // require more agreement to begin clearing
 int hitCounter = 0;
 bool occupied = false;
 
@@ -42,6 +42,27 @@ float magEMA = NAN, magBaseline = NAN;
 uint32_t lastPush = 0;
 bool lastOccupied = false;
 uint32_t lastSample = 0;
+
+// ---- additions for stability (no comment text above changed) ----
+const uint32_t EXIT_LINGER_MS = 3000;       // require 3s of consistent "free" before clearing
+uint32_t clearStartTs = 0;
+int enterHits = 0;
+int exitHits  = 0;
+
+// 5-sample median filter for ultrasonic
+static const int MED_N = 5;
+float usBuf[MED_N];
+int   usIdx = 0;
+bool  usFilled = false;
+static float median5(float a[], int n) {
+  float b[MED_N];
+  for (int i=0;i<n;i++) b[i]=a[i];
+  for (int i=1;i<n;i++){ float key=b[i]; int j=i-1; while(j>=0 && b[j]>key){ b[j+1]=b[j]; j--; } b[j+1]=key; }
+  return b[n/2];
+}
+inline void usFilterAdd(float v) { if (v >= 0) { usBuf[usIdx++] = v; if (usIdx>=MED_N){ usIdx=0; usFilled=true; } } }
+inline bool usFilterReady()      { return usFilled || usIdx>2; }
+inline float usFiltered()        { int n = usFilled ? MED_N : max(usIdx,1); return median5(usBuf,n); }
 
 // WiFi connection establishment, utilized for testing and ensuring connectivity
 void wifiConnect(uint32_t timeout_ms = 15000) {
@@ -164,6 +185,9 @@ void loop() {
   lastSample = now;
 
   float us = readUltrasonicCM();
+  if (us >= 0) usFilterAdd(us);                      // feed median filter (ignore NoEcho)
+  float usStab = usFilterReady() ? usFiltered() : us;
+
   sensors_event_t evt; mmc.getEvent(&evt);
   float magAbs = sqrtf(evt.magnetic.x*evt.magnetic.x +
                        evt.magnetic.y*evt.magnetic.y +
@@ -186,32 +210,50 @@ void loop() {
     return;
   }
 
-  float dUS = (isnan(usBaseline) || us < 0) ? NAN : (usBaseline - us);
-  bool usEnter = (!isnan(dUS) && dUS > US_ENTER_CM);
-  bool usExit  = (!isnan(dUS) && dUS < US_EXIT_CM);
+  float dUS = (isnan(usBaseline) || usStab < 0) ? NAN : (usBaseline - usStab);
+  bool haveUS = (usStab >= 0);
+  bool usEnter = (!isnan(dUS) && dUS >= US_ENTER_CM);
+  bool usExit  = (!isnan(dUS) && dUS <= US_EXIT_CM);
 
   if (!occupied) {
-    hitCounter = usEnter ? hitCounter + 1 : max(0, hitCounter - 1);
-    if (hitCounter >= HIT_UP) { occupied = true; hitCounter = 0; }
+    // accumulate enters; decay slowly on counter-evidence
+    if (usEnter) enterHits++; else if (haveUS) enterHits = max(0, enterHits - 1);
+    exitHits = 0; clearStartTs = 0;
+    if (enterHits >= HIT_UP) { occupied = true; enterHits = 0; }
   } else {
-    hitCounter = usExit ? hitCounter + 1 : max(0, hitCounter - 1);
-    if (hitCounter >= HIT_DOWN) { occupied = false; hitCounter = 0; }
+    // need many exits AND 3s of continuous exit before clearing
+    if (usExit) {
+      if (exitHits < HIT_DOWN) exitHits++;
+      if (exitHits >= HIT_DOWN) {
+        if (clearStartTs == 0) clearStartTs = now;
+        if (now - clearStartTs >= EXIT_LINGER_MS) {
+          occupied = false; exitHits = 0; clearStartTs = 0;
+        }
+      }
+    } else if (haveUS) {
+      exitHits = 0; clearStartTs = 0; // any counter evidence cancels clear
+    }
   }
+
+  // keep your debug print intact; map hitCounter to the active counter
+  hitCounter = occupied ? exitHits : enterHits;
 
   static uint32_t lastPrint = 0;
   if (now - lastPrint > 500) {
     lastPrint = now;
-    Serial.print("US="); if (us < 0) Serial.print("NoEcho"); else { Serial.print(us,1); Serial.print("cm"); }
+    Serial.print("US="); if (usStab < 0) Serial.print("NoEcho"); else { Serial.print(usStab,1); Serial.print("cm"); }
     Serial.print(" ΔUS="); if (isnan(dUS)) Serial.print("-"); else Serial.print(dUS,1);
     Serial.print("  OCCUPIED="); Serial.print(occupied ? "YES" : "no");
-    Serial.print("  (hc="); Serial.print(hitCounter); Serial.println(")");
+    Serial.print("  (hc="); Serial.print(hitCounter); 
+    if (clearStartTs) { Serial.print(", clearing_in≈"); Serial.print(max<int>(0,(EXIT_LINGER_MS - (now - clearStartTs))/1000)); Serial.print("s"); }
+    Serial.println(")");
   }
 
   //Update RTDB on change or periodic
   bool change = (occupied != lastOccupied);
   bool heartbeat = (now - lastPush >= HEARTBEAT_MS);
   if (change || heartbeat) {
-    publishSpot(spotPath_A1, occupied, us, magAbs);
+    publishSpot(spotPath_A1, occupied, usStab, magAbs);
     lastPush = now;
     lastOccupied = occupied;
   }
