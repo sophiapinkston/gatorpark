@@ -158,6 +158,9 @@
       return `trend: ${arrow} (${delta > 0 ? "+" : ""}${delta.toFixed(1)} pts)`;
     };
 
+    // Track latest occupancy % for each garage (used by Best Garage card)
+    const lastPct = { A: null, B: null };
+
     async function recomputeGarage(garageId) {
       const prefix = `garages/${garageId}`;
       const snap = await get(child(ref(db), `${prefix}/spots`));
@@ -165,6 +168,9 @@
       const total = Object.keys(spots).length || 0;
       const occ = Object.values(spots).filter(s => s && s.occupied).length;
       const pct = total ? (occ / total) * 100 : 0;
+
+      // stash for Best Garage card
+      lastPct[garageId] = pct;
 
       document.getElementById(`garage${garageId}Total`).textContent = total || "—";
       document.getElementById(`garage${garageId}Occ`).textContent   = occ;
@@ -186,15 +192,20 @@
     }
 
     function updateBestGarage() {
-      const aTxt = document.getElementById("garageAPct").textContent;
-      const bTxt = document.getElementById("garageBPct").textContent;
-      const a = parseFloat(aTxt) || Infinity;
-      const b = parseFloat(bTxt) || Infinity;
+      const a = lastPct.A;
+      const b = lastPct.B;
 
       let best = "—";
-      if (isFinite(a) && isFinite(b)) best = (a <= b) ? `Garage A (${aTxt})` : `Garage B (${bTxt})`;
-      else if (isFinite(a)) best = `Garage A (${aTxt})`;
-      else if (isFinite(b)) best = `Garage B (${bTxt})`;
+      const hasA = typeof a === "number";
+      const hasB = typeof b === "number";
+
+      if (hasA && hasB) {
+        best = (a <= b) ? `Garage A (${fmtPct(a)})` : `Garage B (${fmtPct(b)})`;
+      } else if (hasA) {
+        best = `Garage A (${fmtPct(a)})`;
+      } else if (hasB) {
+        best = `Garage B (${fmtPct(b)})`;
+      }
 
       document.getElementById("bestGarage").textContent = best;
     }
