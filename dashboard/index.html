@@ -1,36 +1,44 @@
+<!--
+dashboard html file for GatorPark project
+Displays real-time parking spot occupancy and garage status
+Uses Firebase Realtime Database for data storage and retrieval
+-->
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
+  <meta charset="utf-8">
   <title>GatorPark Dashboard</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
-    }
-    #spotA1 {
-      font-size: 24px;
-      margin-top: 20px;
-      padding: 10px;
-      border: 2px solid #333;
-      width: 200px;
-      text-align: center;
-    }
+    body { font-family: system-ui, Arial, sans-serif; padding:20px; }
+    .card { border:1px solid #ddd; border-radius:12px; padding:16px; margin-bottom:12px; }
+    .spot { font-size:1.4rem; }
+    .ok { color:#0a0; } .warn { color:#d58500; } .bad { color:#c00; }
   </style>
 </head>
 <body>
-  <h1>GatorPark Dashboard</h1>
-  <div id="spotA1">Loading...</div>
+  <h1>GatorPark</h1>
+<!-- garage A -->
+  <div class="card">
+    <h2>Garage A</h2>
+    <div class="spot">A1: <span id="spotA1">Loading…</span></div>
+    <div>Occupancy: <span id="garageARate">—</span> — <span id="garageABusy">—</span></div>
+  </div>
+<!-- garage b ! -->
+  <div class="card">
+    <h2>Garage B</h2>
+    <div class="spot">B2: <span id="spotB2">Loading…</span></div>
+    <div>Occupancy: <span id="garageBRate">—</span> — <span id="garageBBusy">—</span></div>
+  </div>
 
-  <!-- Firebase CDN -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <!-- firebase config & intialization -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getDatabase, ref, onValue, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-  <script>
-    // Your Firebase config
     const firebaseConfig = {
       apiKey: "AIzaSyC-Gc7pl0JDUAKkEI0nBrk56X9EROphzbU",
       authDomain: "gatorpark-1d593.firebaseapp.com",
+      databaseURL: "https://gatorpark-1d593-default-rtdb.firebaseio.com",
       projectId: "gatorpark-1d593",
       storageBucket: "gatorpark-1d593.firebasestorage.app",
       messagingSenderId: "721098330413",
@@ -38,26 +46,37 @@
       measurementId: "G-FSMGQQ6EPB"
     };
 
-    // Initialize Firebase
-    const app = firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
 
-    // Get spotA1 element
-    const spotElement = document.getElementById("spotA1");
+    const a1Ref = ref(db, "garages/A/spots/A1");
+    const b2Ref = ref(db, "garages/B/spots/B2"); 
 
-    // Listen for live updates
-    db.collection("garages")
-      .doc("garage1")
-      .collection("spots")
-      .doc("spotA1")
-      .onSnapshot((doc) => {
-        const data = doc.data();
-        if (data) {
-          spotElement.innerText = data.occupied ? "Occupied 🚗" : "Free ✅";
-        } else {
-          spotElement.innerText = "No Data";
-        }
-      });
+    function renderSpot(el, data) {
+      if (!data) { el.textContent = "—"; return; }
+      const txt = data.occupied ? "Occupied 🚗" : "Free ✅";
+      el.textContent = txt;
+      el.className = data.occupied ? "bad" : "ok";
+    }
+
+    onValue(a1Ref, snap => renderSpot(document.getElementById("spotA1"), snap.val()));
+    onValue(b2Ref, snap => renderSpot(document.getElementById("spotB2"), snap.val()));
+
+    async function updateGarage(garageId) {
+      const snap = await get(ref(db, `garages/${garageId}/spots`));
+      const spots = snap.val() || {};
+      const total = Object.keys(spots).length || 0;
+      const occ = Object.values(spots).filter(s => s && s.occupied).length;
+      const pct = total ? Math.round(occ / total * 100) : 0;
+      const rateEl = document.getElementById(`garage${garageId}Rate`);
+      const busyEl = document.getElementById(`garage${garageId}Busy`);
+      rateEl.textContent = `${pct}%`;
+      busyEl.textContent = pct >= 70 ? "Busy 🔴" : pct >= 30 ? "Somewhat Busy 🟠" : "Not Busy 🟢";
+      busyEl.className = pct >= 70 ? "bad" : pct >= 30 ? "warn" : "ok";
+    }
+
+    setInterval(() => updateGarage("A"), 1500);
+    setInterval(() => updateGarage("B"), 1500);
   </script>
 </body>
 </html>
