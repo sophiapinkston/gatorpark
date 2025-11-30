@@ -1,0 +1,38 @@
+.image-box {
+  width: 400px;          /* Set width */
+  height: 300px;         /* Set height */
+  
+  background-image: url('ufcampus.jpg'); /* Path to your image */
+  background-size: cover;    /* Fill the div completely, maintaining aspect ratio */
+  background-position: center; /* Center the image */
+  background-repeat: no-repeat; /* Prevent tiling */
+  
+  border: 1px solid #ccc; /* Optional: border for visibility */
+}
+
+.login-btn {
+  display: inline-block;
+  padding: 14px 28px;
+  font-size: 16px;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  
+  background-color: #2C6EFF;     /* UF blue */
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+
+  transition: all 0.2s ease;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+}
+
+.login-btn:hover {
+  background-color: #1a4fcc;     /* darker blue */
+  transform: translateY(-2px);
+}
+
+.login-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12);
+}
