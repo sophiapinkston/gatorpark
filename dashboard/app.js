@@ -5,16 +5,14 @@
  import { fileURLToPath } from 'url';
  const __filename = fileURLToPath(import.meta.url);
  const __dirname = path.dirname(__filename);
-import { JsonDB } from "node-json-db";
-import { Config } from "node-json-db/dist/lib/JsonDBConfig.js";
 
-// Create database
-const db = new JsonDB(new Config("myDataBase", true, false, "/"));
+const db = new Map();
 
 const app = express();
 
 // Middleware, allows for post data parsing
 app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
 
 // Landing page
@@ -30,7 +28,30 @@ app.get('/login', (req, res) => {
 });
 app.post('/login', (req, res) => {
   const {username, password} = req.body;
-  res.send(username);
+  if (!db.has(username)) {
+    return res.send("Username does not exist.");
+  } 
+  const user = db.get(username);
+  if (user.password === password) {
+        return res.redirect('/dashboard');
+    } else {
+        return res.send("Password incorrect");
+    }
+});
+
+// Register page
+app.use(express.static('public/register'));
+app.get('/register', (req, res) => {
+  res.sendFile(path.join(__dirname, "/public/register/register.html"));
+});
+
+app.post('/register', (req, res) => {
+  const {username, password} = req.body;
+  if (db.has(username)) {
+    return res.send("Username already taken");
+  } 
+  db.set(username, { password });
+  return res.redirect('/login');
 });
 
 // Dashboard page
