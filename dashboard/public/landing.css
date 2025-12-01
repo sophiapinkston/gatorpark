@@ -1,38 +1,81 @@
-.image-box {
-  width: 400px;          /* Set width */
-  height: 300px;         /* Set height */
-  
-  background-image: url('ufcampus.jpg'); /* Path to your image */
-  background-size: cover;    /* Fill the div completely, maintaining aspect ratio */
-  background-position: center; /* Center the image */
-  background-repeat: no-repeat; /* Prevent tiling */
-  
-  border: 1px solid #ccc; /* Optional: border for visibility */
+.image {
+  width: 100vw;    
+  height: 40vh;   
+  background-image: url('skinnyUF.jpg'); 
+  background-size: cover;   
+  background-position: center; 
+  background-repeat: no-repeat; 
+  display: flex;
+  flex-direction: row;
 }
 
-.login-btn {
-  display: inline-block;
-  padding: 14px 28px;
-  font-size: 16px;
+.gatorLink {
+  display: flex;                 /* <-- make it a flex container */
+  align-items: center;           /* <-- center vertically */
+  justify-content: center; 
+  font-size: 30px;
   font-weight: 600;
-  font-family: 'Inter', sans-serif;
-  
-  background-color: #2C6EFF;     /* UF blue */
+  max-width: 200px;
+  padding: 16px;
+  font-family: 'IBM Plex Sans';
+  font-weight: 600;
+  background-color: #Fa4616;    
+  border-color: #Fa4616;
   color: white;
-  border: none;
-  border-radius: 8px;
   cursor: pointer;
-
   transition: all 0.2s ease;
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+  text-decoration: none;
 }
 
-.login-btn:hover {
-  background-color: #1a4fcc;     /* darker blue */
+.gatorLink:hover {
+  background-color: #b84300;    
   transform: translateY(-2px);
 }
 
-.login-btn:active {
+.gatorLink:active {
   transform: translateY(0);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12);
+}
+
+.navbar {
+  height: 20vh;
+  background-color: #0021a5;
+  display: flex;
+  flex-direction: row;
+  padding: 0px 20px;
+}
+
+.overlay-text {
+    position: absolute;
+    top: 50%;                     /* center vertically */
+    left: 30%;                    /* center horizontally */
+    transform: translate(-50%, -50%);
+    color: white;
+    font-family: 'IBM Plex Sans';
+    font-size:64px;
+    font-weight: bold;
+    pointer-events: none;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+   
+}
+
+.overlay-text::before {
+    content: '';
+    width: 2px;
+    height: 169px;
+    background-color: #FA4616;
+    position: absolute;
+    left: -25px;
+    top: -21px;
+}
+
+.h2 {
+  font-family: 'IBM Plex Sans';
+  font-weight: 400;
+  font-size: 30px;
+}
+.paragraph {
+  font-family: 'IBM Plex Sans';
+  font-weight: 300;
 }

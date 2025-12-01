@@ -1,5 +1,5 @@
 
- import * as functions from 'firebase-functions';
+ 
  import express from 'express';
  import path from 'path';
  import { fileURLToPath } from 'url';
@@ -20,7 +20,7 @@ app.use(express.json());
 
 
 // Landing page
-app.use(express.static('public/landing'));
+app.use(express.static('public/'));
 app.get('/landing', (req, res) => {
   res.sendFile(path.join(__dirname, "/public/index.html"));
 });
@@ -30,7 +30,7 @@ app.use(express.static('public/login'));
 app.get('/login', (req, res) => {
   res.sendFile(path.join(__dirname, "/public/login/login.html"));
 });
-app.post('/api/login', (req, res) => {
+app.post('/login', (req, res) => {
   const {username, password} = req.body;
   if (!db.has(username)) {
     return res.send("Username does not exist.");
@@ -65,7 +65,7 @@ app.use(express.static('public/register'));
 app.get('/register', (req, res) => {
   res.sendFile(path.join(__dirname, "/public/register/register.html"));
 });
-app.post('/api/register', (req, res) => {
+app.post('/register', (req, res) => {
   const {email, username, password} = req.body;
   const regex = /^[a-zA-Z0-9._%+-]+@ufl\.edu$/;
   if (!regex.test(email)) {
@@ -90,7 +90,5 @@ var server = app.listen(5000, function() {
     console.log('listening to requests on port 5000');
 });
     
-export const api = functions.https.onRequest(app);
-
    
 
