@@ -9,16 +9,10 @@
   <link rel="stylesheet" href="../login/login.css" />
 </head>
 <body>
-  <form method="POST" action="/api/register" class="login-form">
+  <form method="POST" action="/mfa" class="login-form">
   <h2>Register</h2>
-  <label for="email">Email</label>
-  <input type="text" id="email" name="email" placeholder="Enter your email" required>
-
-  <label for="username">Username</label>
-  <input type="text" id="username" name="username" placeholder="Enter your username" required>
-
-  <label for="password">Password</label>
-  <input type="password" id="password" name="password" placeholder="Enter your password" required>
+  <label for="code">Email</label>
+  <input type="text" id="code" name="code" placeholder="Enter the code sent to your school email" required>
 
   <button type="submit" class="gator-btn">Submit</button>
 </form>

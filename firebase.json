@@ -1,0 +1,38 @@
+{
+  "hosting": {
+    "public": "dashboard/public",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "/login",
+        "destination": "/login/login.html"
+      },
+      {
+        "source": "/register",
+        "destination": "/register/register.html"
+      },
+       {
+        "source": "/api/**",
+        "function": "api"
+      }
+    ]
+  },
+  "functions": [
+    {
+      "source": "functions",
+      "codebase": "default",
+      "disallowLegacyRuntimeConfig": true,
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "*.local"
+      ]
+    }
+  ]
+}
