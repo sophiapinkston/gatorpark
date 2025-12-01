@@ -15,7 +15,7 @@
 * { box-sizing: border-box; }
 
 body {
-  font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-family: "IBM Plex Sans";
   margin: 0;
   background: var(--bg);
   color: var(--ink);
@@ -71,3 +71,42 @@ main {
 .trend, .small { color: var(--muted); font-size: 12px; }
 
 footer { padding: 16px 24px; border-top: 1px solid var(--card-border); color: var(--muted); font-size: 12px; }
+
+.navbar {
+  height: 20vh;
+  background-color: #0021a5;
+  display: flex;
+  flex-direction: row;
+  padding: 0px 20px;
+}
+
+.image {
+  width: 100vw;    
+  height: 20vh;   
+  background-image: url('skinnyUF.jpg'); 
+  background-size: cover;   
+  background-position: center; 
+  background-repeat: no-repeat; 
+  display: flex;
+  flex-direction: row;
+}
+
+.overlay-text {
+    position: absolute;
+    top: 30%;                   
+    left: 50%;                    
+    transform: translate(-50%, -50%);
+    color: white;
+    font-family: 'IBM Plex Sans';
+    font-size:42px;
+    font-weight: bold;
+    pointer-events: none;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+   
+}
+
+.paragraph {
+  font-family: 'IBM Plex Sans';
+  font-weight: 300;
+  font-size: 19px;
+}
