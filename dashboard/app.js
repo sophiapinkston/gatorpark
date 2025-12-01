@@ -30,7 +30,7 @@ app.use(express.static('public/login'));
 app.get('/login', (req, res) => {
   res.sendFile(path.join(__dirname, "/public/login/login.html"));
 });
-app.post('/login', (req, res) => {
+app.post('/api/login', (req, res) => {
   const {username, password} = req.body;
   if (!db.has(username)) {
     return res.send("Username does not exist.");
@@ -65,7 +65,7 @@ app.use(express.static('public/register'));
 app.get('/register', (req, res) => {
   res.sendFile(path.join(__dirname, "/public/register/register.html"));
 });
-app.post('/register', (req, res) => {
+app.post('/api/register', (req, res) => {
   const {email, username, password} = req.body;
   const regex = /^[a-zA-Z0-9._%+-]+@ufl\.edu$/;
   if (!regex.test(email)) {

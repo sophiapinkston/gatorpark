@@ -4,14 +4,24 @@
   <meta charset="utf-8" />
   <title>GatorPark Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <!-- Inter font (accessible, neutral), with system-ui fallback -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,100..700;1,100..700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
   <!-- External stylesheet -->
   <link rel="stylesheet" href="login.css" />
 </head>
-<body>
+<body class="background">
+  <div class="navbar">
+    <div class="blue">
+      <img src="ufletters.svg" width=41px class="ufLetters">
+    </div>
+  </div>
+  <div class="navbar2">
+    <img src="UFIT-Logo-Blue.svg" width=400px class="ufitLogo">
+    <a href="/register" class="tab">CREATE ACCOUNT</a>
+  </div>
   <form method="POST" action="/api/login" class="login-form">
-  <h2>Login</h2>
 
   <label for="username">Username</label>
   <input type="text" id="username" name="username" placeholder="Enter your username" required>
@@ -19,9 +29,8 @@
   <label for="password">Password</label>
   <input type="password" id="password" name="password" placeholder="Enter your password" required>
 
-  <button type="submit" class="gator-btn">Login</button>
+  <button type="submit" class="gatorLink">LOGIN</button>
 </form>
-  <a href="/register" class="login-btn">Register</a>
 
 
 </body>

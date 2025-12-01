@@ -7,14 +7,6 @@
       "**/node_modules/**"
     ],
     "rewrites": [
-      {
-        "source": "/login",
-        "destination": "/login/login.html"
-      },
-      {
-        "source": "/register",
-        "destination": "/register/register.html"
-      },
        {
         "source": "/api/**",
         "function": "api"

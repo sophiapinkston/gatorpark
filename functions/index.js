@@ -33,6 +33,7 @@ const app = express();
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
+app.use(express.static('public/register'));
 app.post('/api/register', (req, res) => {
   const {email, username, password} = req.body;
   const regex = /^[a-zA-Z0-9._%+-]+@ufl\.edu$/;
@@ -46,6 +47,7 @@ app.post('/api/register', (req, res) => {
   return res.redirect('/login');
 });
 
+app.use(express.static('public/login'));
 app.post('/api/login', (req, res) => {
   const {username, password} = req.body;
   if (!db.has(username)) {
